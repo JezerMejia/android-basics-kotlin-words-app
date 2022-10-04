@@ -20,6 +20,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,8 +32,7 @@ import com.example.wordsapp.databinding.ActivityMainBinding
  * Main Activity and entry point for the app. Displays a RecyclerView of letters.
  */
 class MainActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private var isLinearLayoutManager = true
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,43 +40,14 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        this.recyclerView = binding.recyclerView
-        this.chooseLayout()
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        this.navController = navHostFragment.navController
+
+        setupActionBarWithNavController(this.navController)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.layout_menu, menu)
-        val layoutButton = menu?.findItem(R.id.action_switch_layout)
-        this.setIcon(layoutButton)
-        return true
-    }
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_switch_layout -> {
-                this.isLinearLayoutManager = !this.isLinearLayoutManager
-                this.chooseLayout()
-                this.setIcon(item)
-                return true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun chooseLayout() {
-        if (this.isLinearLayoutManager) {
-            this.recyclerView.layoutManager = LinearLayoutManager(this)
-        } else {
-            this.recyclerView.layoutManager = GridLayoutManager(this, 4)
-        }
-        this.recyclerView.adapter = LetterAdapter()
-    }
-
-    private fun setIcon(menuItem: MenuItem?) {
-        if (menuItem == null)
-            return
-        menuItem.icon =
-            if (isLinearLayoutManager)
-                ContextCompat.getDrawable(this, R.drawable.ic_grid_layout)
-            else ContextCompat.getDrawable(this, R.drawable.ic_linear_layout)
+    override fun onSupportNavigateUp(): Boolean {
+        return this.navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
